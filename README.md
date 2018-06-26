@@ -1,5 +1,10 @@
 # PhcStringFormat
 
+[![Gem Version](https://badge.fury.io/rb/phc_string_format.svg)](https://badge.fury.io/rb/phc_string_format)
+[![Build Status](https://travis-ci.org/naokikimura/phc_string_format.svg?branch=master)](https://travis-ci.org/naokikimura/phc_string_format)
+[![Known Vulnerabilities](https://snyk.io/test/github/naokikimura/phc_string_format/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/naokikimura/phc_string_format?targetFile=Gemfile.lock)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbcb6fa3556447a4af16980f3cc6f1eb)](https://app.codacy.com/app/naokikimura/phc_string_format?utm_source=github.com&utm_medium=referral&utm_content=naokikimura/phc_string_format&utm_campaign=badger)
+
 TODO: Describe your gem
 
 ## Installation
