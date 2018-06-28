@@ -31,7 +31,7 @@ module PhcStringFormat
       elements = string.split(/\$/, 5)
       elements.shift
       id = elements.shift
-      params = parse_parameter_string(elements.shift) if elements.first.include?('=')
+      params = parse_parameter_string(elements.shift) if (elements.first || '').include?('=')
       salt = hint.dig(:salt, :encoding) == '7bit' ? elements.shift : short_strict_decode64(elements.shift)
       hash = short_strict_decode64(elements.shift)
       {id: id, params: params, salt: salt, hash: hash }
