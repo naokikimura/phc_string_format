@@ -38,7 +38,7 @@ module PhcStringFormat
     end
 
     def self.parse_parameter_string(string)
-      string.split(/,/).map {|e| e.split '='}.each_with_object({}) {|e, h| k, v = e; h[k]=v}
+      string.split(/,/).map {|e| e.split '='}.each_with_object({}) {|e, h| k, v = e; h[k.to_sym] = (/\A-?\d+(.\d+)?\Z/.match(v) ? v.to_i : v)}
     end
 
     def self.short_strict_encode64(bin)
