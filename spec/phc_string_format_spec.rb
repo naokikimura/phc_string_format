@@ -5,7 +5,7 @@ RSpec.describe PhcStringFormat do
     expect(PhcStringFormat::VERSION).not_to be nil
   end
 
-  it "does something useful" do
+  it "is reversible" do
     test_cases = [
       "$argon2i$m=120,t=5000,p=2",
       "$argon2i$m=120,t=4294967295,p=2",
@@ -34,5 +34,11 @@ RSpec.describe PhcStringFormat do
       phc_string = PhcStringFormat::Formatter.format(phc_params)
       expect(phc_string).to eq(test_case)
     end
+  end
+
+  it "can pick when parsing" do
+    string = "$argon2i$v=19$m=4096,t=3,p=1$IfH5R3O3r3501DfGnGr2rw$DfQ8Hv9R2eF2uBs1dR99IGjVjDl/rpkJIkaNyZ1g3pk"
+    params = PhcStringFormat::Formatter.parse(string, pick: [:id, :params, :version])
+    expect(params).to eq({ id: 'argon2i', version: 19, params: {'m' => 4096, 't' => 3, 'p' => 1}})
   end
 end
