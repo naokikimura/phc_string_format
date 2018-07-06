@@ -5,7 +5,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/naokikimura/phc_string_format/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/naokikimura/phc_string_format?targetFile=Gemfile.lock)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbcb6fa3556447a4af16980f3cc6f1eb)](https://app.codacy.com/app/naokikimura/phc_string_format?utm_source=github.com&utm_medium=referral&utm_content=naokikimura/phc_string_format&utm_campaign=badger)
 
-TODO: Describe your gem
+PHC string format implemented by Ruby
 
 ## Installation
 
@@ -25,7 +25,19 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### #parse
+
+```ruby
+require 'phc_string_format'
+
+phc_string_format = "$argon2i$v=19$m=4096,t=3,p=1$IfH5R3O3r3501DfGnGr2rw$DfQ8Hv9R2eF2uBs1dR99IGjVjDl/rpkJIkaNyZ1g3pk"
+
+params = PhcStringFormat::Formatter.parse(phc_string_format)
+
+password_path = PhcStringFormat::Formatter.format(params)
+
+password_path == phc_string_format
+```
 
 ## Development
 
