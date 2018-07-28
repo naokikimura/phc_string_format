@@ -25,18 +25,19 @@ Or install it yourself as:
 
 ## Usage
 
-### #parse
-
 ```ruby
 require 'phc_string_format'
 
-phc_string_format = "$argon2i$v=19$m=4096,t=3,p=1$IfH5R3O3r3501DfGnGr2rw$DfQ8Hv9R2eF2uBs1dR99IGjVjDl/rpkJIkaNyZ1g3pk"
+encrypted_password = '$argon2i$v=19$m=4096,t=3,p=1$IfH5R3O3r3501DfGnGr2rw$DfQ8Hv9R2eF2uBs1dR99IGjVjDl/rpkJIkaNyZ1g3pk'
 
-params = PhcStringFormat::Formatter.parse(phc_string_format)
+# parse
+phc_string_params = PhcStringFormat::Formatter.parse(encrypted_password)
+# => {:id=>"argon2i", :version=>19, :params=>{"m"=>4096, "t"=>3, "p"=>1}, :salt=>"!\xF1\xF9Gs\xB7\xAF~t\xD47\xC6\x9Cj\xF6\xAF", :hash=>"\r\xF4<\x1E\xFFQ\xD9\xE1v\xB8\e5u\x1F} h\xD5\x8C9\x7F\xAE\x99\t\"F\x8D\xC9\x9D`\xDE\x99"}
 
-password_path = PhcStringFormat::Formatter.format(params)
+# format
+password_hash = PhcStringFormat::Formatter.format(phc_string_params)
 
-password_path == phc_string_format
+password_hash == phc_string_format
 ```
 
 ## Development
