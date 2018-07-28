@@ -29,8 +29,8 @@ module PhcStringFormat
       elements = string.split(/\$/, 6)
       elements.shift
       id = shift_and_parse elements, pick.include?(:id), &-> (e) { e }
-      version = shift_and_parse(elements, pick.include?(:version), &@@parse_version) if (elements.first || '').start_with?('v=')
-      params = shift_and_parse(elements, pick.include?(:params), &@@parse_parameter_string) if (elements.first || '').include?('=')
+      version = shift_and_parse(elements, pick.include?(:version), &@parse_version) if (elements.first || '').start_with?('v=')
+      params = shift_and_parse(elements, pick.include?(:params), &@parse_parameter_string) if (elements.first || '').include?('=')
       salt = shift_and_parse elements, pick.include?(:salt), &-> (e) {
         hint.dig(:salt, :encoding) == '7bit' ? e : short_strict_decode64(e)
       }
@@ -43,12 +43,17 @@ module PhcStringFormat
       proc.call(element) if picks
     end
 
-    @@parse_version = -> (string) {
-      @@parse_parameter_string.call(string)['v']
+    @parse_version = -> (string) {
+      @parse_parameter_string.call(string)['v']
     }
 
-    @@parse_parameter_string = -> (string) {
-      string.split(/,/).map {|e| e.split '='}.each_with_object({}){|e, h| k, v = e; h[k] = (/\A-?\d+(.\d+)?\Z/.match(v) ? v.to_i : v)}
+    @parse_parameter_string = -> (string) {
+      (string || '').split(/,/)
+        .map { |param| param.split '=' }
+        .each_with_object({}) { |param, params|
+          name, value = param
+          params[name] = (/\A-?\d+(.\d+)?\Z/.match(value) ? value.to_i : value)
+        }
     }
 
     def self.short_strict_encode64(bin)
