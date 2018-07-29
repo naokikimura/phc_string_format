@@ -1,0 +1,32 @@
+AllCops:
+  Exclude:
+  - bin/*
+  - pkg/*
+  - tmp/**/*
+  - lib/*/version.rb
+  - spec/spec_helper.rb
+  - Gemfile
+  - '*.gemspec'
+  - Rakefile
+
+Metrics/AbcSize:
+  Max: 20
+
+Metrics/BlockLength:
+  Exclude:
+  - 'spec/**/*'
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/LineLength:
+  Max: 110
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/ParameterLists:
+  Max: 6
+
+Metrics/PerceivedComplexity:
+  Max: 10
