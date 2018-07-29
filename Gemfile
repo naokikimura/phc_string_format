@@ -5,5 +5,4 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 # Specify your gem's dependencies in phc_string_format.gemspec
 gemspec
 
-gem "pry-byebug", "~> 3.6", require: false, :groups => [:development, :test]
 gem "rubocop", "~> 0.58.2", require: false, :groups => [:development, :test]
