@@ -1,0 +1,25 @@
+---
+detectors:
+
+  DuplicateMethodCall:
+    exclude:
+    - 'PhcStringFormat::PhcString#self.parse'
+  FeatureEnvy:
+    exclude:
+      - 'PhcStringFormat::PhcString#parse_params'
+
+  LongParameterList:
+    max_params: 6
+    overrides:
+      initialize:
+        max_params: 6
+
+  TooManyStatements:
+    max_statements: 10
+
+  TooManyInstanceVariables:
+    max_instance_variables: 6
+
+  UncommunicativeModuleName:
+    accept:
+    - B64

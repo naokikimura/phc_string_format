@@ -4,7 +4,8 @@ module PhcStringFormat
   #
   class PhcString
     def self.parse(string, hint: {})
-      elements = (string || '').split(/\$/, 6)
+      string ||= ''
+      elements = string.split(/\$/, 6)
       elements.shift
       id = elements.shift
       version = elements.shift if (elements.first || '').start_with?('v=')
@@ -18,7 +19,7 @@ module PhcStringFormat
       PhcString.new(
         id,
         ("v=#{version}" if version),
-        (params.map { |e| e.join '=' }.join(',') if params),
+        (params.map { |entry| entry.join '=' }.join(',') if params),
         hint.dig(:salt, :encoding) == '7bit' ? salt : B64.encode(salt),
         B64.encode(hash),
         hint
@@ -46,7 +47,7 @@ module PhcStringFormat
         @params_string,
         @encoded_salt,
         @encoded_hash
-      ].reject { |e| e.nil? || e.empty? }.join('$')
+      ].reject { |element| !element || element.empty? }.join('$')
     end
 
     def to_h(pick = nil)
@@ -60,7 +61,7 @@ module PhcStringFormat
             @hint.dig(:salt, :encoding) == '7bit' ? e : B64.decode(@encoded_salt)
           end,
         hash: (B64.decode(@encoded_hash) if pick.include?(:hash))
-      }.select { |_, v| v }
+      }.select { |_, value| value }
     end
 
     private
@@ -75,7 +76,8 @@ module PhcStringFormat
         name, value = param
         params[name] = value =~ /\A-?\d+(.\d+)?\Z/ ? value.to_i : value
       end
-      (params_string || '').split(/,/).map(&mapper).each_with_object({}, &reducer)
+      params_string ||= ''
+      params_string.split(/,/).map(&mapper).each_with_object({}, &reducer)
     end
   end
 end
