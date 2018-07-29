@@ -3,23 +3,12 @@ module PhcStringFormat
   # Parser for parsing PHC-string-format.
   #
   class PhcString
-    @parse_version = ->(version) { @parse_parameters.call(version)['v'] }
-
-    @parse_parameters = lambda do |parameters|
-      mapper = ->(param) { param.split '=' }
-      reducer = lambda do |param, params|
-        name, value = param
-        params[name] = value =~ /\A-?\d+(.\d+)?\Z/ ? value.to_i : value
-      end
-      (parameters || '').split(/,/).map(&mapper).each_with_object({}, &reducer)
-    end
-
     def self.parse(string, hint: {})
       elements = (string || '').split(/\$/, 6)
       elements.shift
       id = elements.shift
-      version = @parse_version.call(elements.shift) if (elements.first || '').start_with?('v=')
-      params = @parse_parameters.call(elements.shift) if (elements.first || '').include?('=')
+      version = elements.shift if (elements.first || '').start_with?('v=')
+      params = elements.shift if (elements.first || '').include?('=')
       salt = elements.shift
       hash = elements.shift
       PhcString.new(id, version, params, salt, hash, hint)
@@ -36,31 +25,57 @@ module PhcStringFormat
       )
     end
 
-    def initialize(id, version, params, salt, hash, hint)
+    def initialize(id, version_string, params_string, encoded_salt, encoded_hash, hint)
       raise ArgumentError.new, 'id is required' unless id
-      raise ArgumentError.new, 'hash needs salt' if (!salt || salt.empty?) && !(!hash || hash.empty?)
+      if (!encoded_salt || encoded_salt.empty?) && !(!encoded_hash || encoded_hash.empty?)
+        raise ArgumentError.new, 'hash needs salt'
+      end
 
       @id = id
-      @version = version
-      @params = params
-      @salt = salt
-      @hash = hash
+      @version_string = version_string
+      @params_string = params_string
+      @encoded_salt = encoded_salt
+      @encoded_hash = encoded_hash
       @hint = hint
     end
 
     def to_s
-      '$' + [@id, @version, @params, @salt, @hash].reject { |e| e.nil? || e.empty? }.join('$')
+      '$' + [
+        @id,
+        @version_string,
+        @params_string,
+        @encoded_salt,
+        @encoded_hash
+      ].reject { |e| e.nil? || e.empty? }.join('$')
     end
 
     def to_h(pick = nil)
       pick ||= %i[id version params salt hash]
       {
         id: (@id if pick.include?(:id)),
-        version: (@version if pick.include?(:version)),
-        params: (@params if pick.include?(:params)),
-        salt: ((@hint.dig(:salt, :encoding) == '7bit' ? e : B64.decode(@salt)) if pick.include?(:salt)),
-        hash: (B64.decode(@hash) if pick.include?(:hash))
+        version: (parse_version(@version_string) if pick.include?(:version)),
+        params: (parse_params(@params_string) if pick.include?(:params)),
+        salt:
+          if pick.include?(:salt)
+            @hint.dig(:salt, :encoding) == '7bit' ? e : B64.decode(@encoded_salt)
+          end,
+        hash: (B64.decode(@encoded_hash) if pick.include?(:hash))
       }.select { |_, v| v }
+    end
+
+    private
+
+    def parse_version(version_string)
+      parse_params(version_string)['v']
+    end
+
+    def parse_params(params_string)
+      mapper = ->(param) { param.split '=' }
+      reducer = lambda do |param, params|
+        name, value = param
+        params[name] = value =~ /\A-?\d+(.\d+)?\Z/ ? value.to_i : value
+      end
+      (params_string || '').split(/,/).map(&mapper).each_with_object({}, &reducer)
     end
   end
 end
