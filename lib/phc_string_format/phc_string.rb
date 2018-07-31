@@ -12,10 +12,14 @@ module PhcStringFormat
       params = elements.shift if (elements.first || '').include?('=')
       salt = elements.shift
       hash = elements.shift
-      PhcString.new(id, version, params, salt, hash, hint)
+      begin
+        PhcString.new(id, version, params, salt, hash, hint)
+      rescue ArgumentError
+        raise ParseError
+      end
     end
 
-    def self.create(id:, version: nil, params: {}, salt: '', hash: '', hint: {})
+    def self.create(id:, version: nil, params: nil, salt: nil, hash: nil, hint: {})
       PhcString.new(
         id,
         ("v=#{version}" if version),
@@ -27,10 +31,18 @@ module PhcStringFormat
     end
 
     def initialize(id, version_string, params_string, encoded_salt, encoded_hash, hint)
-      raise ArgumentError.new, 'id is required' unless id
-      if (!encoded_salt || encoded_salt.empty?) && !(!encoded_hash || encoded_hash.empty?)
-        raise ArgumentError.new, 'hash needs salt'
+      validates(message: 'id is non-compliant') { id && id =~ /\A[a-z0-9-]{1,32}\z/ }
+      validates(message: 'version is non-compliant') { !version_string || version_string =~ /\Av=\d+\z/ }
+      validates(message: 'parameters is non-compliant') do
+        !params_string || params_string.split(',').all? \
+          { |param| param =~ %r{\A[a-z0-9-]{1,32}=[a-zA-Z0-9/+.-]+\z} }
       end
+      validates(message: 'encoded salt is non-compliant') \
+        { !encoded_salt || encoded_salt =~ %r{\A[a-zA-Z0-9/+.-]+\z} }
+      validates(message: 'encoded hash is non-compliant') \
+        { !encoded_hash || encoded_hash =~ %r{\A[a-zA-Z0-9\/+]+\z} }
+      validates(message: 'hash needs salt') \
+        { !((!encoded_salt || encoded_salt.empty?) && !(!encoded_hash || encoded_hash.empty?)) }
 
       @id = id
       @version_string = version_string
@@ -66,6 +78,10 @@ module PhcStringFormat
 
     private
 
+    def validates(message:)
+      raise ArgumentError, message unless yield
+    end
+
     def parse_version(version_string)
       parse_params(version_string)['v']
     end
@@ -80,4 +96,6 @@ module PhcStringFormat
       params_string.split(/,/).map(&mapper).each_with_object({}, &reducer)
     end
   end
+
+  class ParseError < StandardError; end
 end
