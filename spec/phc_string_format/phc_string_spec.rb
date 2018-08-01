@@ -181,4 +181,14 @@ RSpec.describe PhcStringFormat::PhcString do
       end
     end
   end
+
+  describe '#==' do
+    it 'can equality compare' do
+      encrypted_password = '$argon2i$v=19$m=4096,t=3,p=1' \
+        '$IfH5R3O3r3501DfGnGr2rw$DfQ8Hv9R2eF2uBs1dR99IGjVjDl/rpkJIkaNyZ1g3pk'
+      expected = PhcStringFormat::PhcString.parse(encrypted_password)
+      actual = PhcStringFormat::PhcString.parse(encrypted_password)
+      expect(actual).to eq expected
+    end
+  end
 end

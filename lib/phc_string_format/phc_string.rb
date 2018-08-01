@@ -102,6 +102,11 @@ module PhcStringFormat
       }.select { |_, value| value }
     end
 
+    def ==(other)
+      instance_variable_values = other.instance_variables.map { |name| other.instance_variable_get(name) }
+      instance_variable_values == instance_variables.map { |name| instance_variable_get(name) }
+    end
+
     private
 
     def parse_version(version_string)
