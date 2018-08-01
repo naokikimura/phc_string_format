@@ -115,6 +115,28 @@ RSpec.describe PhcStringFormat::PhcString do
       end
     end
 
+    context 'when parameters is empty' do
+      it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, '', nil, nil, nil) }
+          .to raise_error ArgumentError, 'parameters is non-compliant'
+      end
+    end
+
+    context 'when parameter name contains characters other than: [a-z0-9-]' do
+      it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, '01_foo', nil, nil, nil) }
+          .to raise_error ArgumentError, 'parameters is non-compliant'
+      end
+    end
+
+    context 'when the parameter name exceeds 32 characters' do
+      it 'should raise the error' do
+        params_string = 'bar' * 11
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, params_string, nil, nil, nil) }
+          .to raise_error ArgumentError, 'parameters is non-compliant'
+      end
+    end
+
     context 'when salt is blank and hash is present' do
       it 'should raise the error' do
         expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, nil, 'UEAkJHcwcmQ', nil) }

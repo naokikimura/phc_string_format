@@ -36,7 +36,7 @@ module PhcStringFormat
       validates(message: 'id is non-compliant') { id && id =~ /\A[a-z0-9-]{1,32}\z/ }
       validates(message: 'version is non-compliant') { !version_string || version_string =~ /\Av=\d+\z/ }
       validates(message: 'parameters is non-compliant') do
-        !params_string || params_string.split(',').all? \
+        !params_string || !params_string.empty? && params_string.split(',').all? \
           { |param| param =~ %r{\A[a-z0-9-]{1,32}=[a-zA-Z0-9/+.-]+\z} }
       end
       validates(message: 'encoded salt is non-compliant') \
