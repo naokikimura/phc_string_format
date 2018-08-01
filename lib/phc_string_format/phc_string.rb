@@ -3,6 +3,7 @@ module PhcStringFormat
   # Parser for parsing PHC-string-format.
   #
   class PhcString
+    # :reek:DuplicateMethodCall { allow_calls: ['elements.shift', 'elements.first'] }
     def self.parse(string, hint: {})
       string ||= ''
       elements = string.split(/\$/, 6)
@@ -30,6 +31,7 @@ module PhcStringFormat
       )
     end
 
+    # :reek:DuplicateMethodCall { allow_calls: ['!encoded_salt', '!encoded_hash'] }
     def initialize(id, version_string, params_string, encoded_salt, encoded_hash, hint)
       validates(message: 'id is non-compliant') { id && id =~ /\A[a-z0-9-]{1,32}\z/ }
       validates(message: 'version is non-compliant') { !version_string || version_string =~ /\Av=\d+\z/ }
@@ -97,5 +99,8 @@ module PhcStringFormat
     end
   end
 
+  #
+  # This exception is raised if a parser error occurs.
+  #
   class ParseError < StandardError; end
 end
