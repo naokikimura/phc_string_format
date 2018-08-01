@@ -119,21 +119,58 @@ RSpec.describe PhcStringFormat::PhcString do
       it 'should raise the error' do
         expect { PhcStringFormat::PhcString.new('argon2i', nil, '', nil, nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, 'foo=0,,bar=1,', nil, nil, nil) }
+          .to raise_error ArgumentError, 'parameters is non-compliant'
       end
     end
 
     context 'when parameter name contains characters other than: [a-z0-9-]' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, '01_foo', nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, '01_foo=0', nil, nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
       end
     end
 
     context 'when the parameter name exceeds 32 characters' do
       it 'should raise the error' do
-        params_string = 'bar' * 11
+        params_string = "#{'bar' * 11}=0"
         expect { PhcStringFormat::PhcString.new('argon2i', nil, params_string, nil, nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
+      end
+    end
+
+    context 'when parameter value contains characters other than: [a-zA-Z0-9/+.-]' do
+      it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, 'p=?', nil, nil, nil) }
+          .to raise_error ArgumentError, 'parameters is non-compliant'
+      end
+    end
+
+    context 'when encoded salt is empty' do
+      it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, '', nil, nil) }
+          .to raise_error ArgumentError, 'encoded salt is non-compliant'
+      end
+    end
+
+    context 'when encoded salt contains characters other than: [a-zA-Z0-9/+.-]' do
+      it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q-_N', nil, nil) }
+          .to raise_error ArgumentError, 'encoded salt is non-compliant'
+      end
+    end
+
+    context 'when encoded hash is empty' do
+      it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q+/N', '', nil) }
+          .to raise_error ArgumentError, 'encoded hash is non-compliant'
+      end
+    end
+
+    context 'when encoded hash contains characters other than: [a-zA-Z0-9/+]' do
+      it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q+/N', 'q-_N', nil) }
+          .to raise_error ArgumentError, 'encoded hash is non-compliant'
       end
     end
 
