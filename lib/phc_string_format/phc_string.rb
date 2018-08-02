@@ -3,20 +3,30 @@ module PhcStringFormat
   # Parser for parsing PHC-string-format.
   #
   class PhcString
-    def self.validates(name, **validator)
-      @validators ||= {}
-      @validators[name] = validator
+    def self.validates(name, **options)
+      @validators ||= []
+      @validators << lambda { |object|
+        value = object.instance_variable_get(name)
+        return if options[:allow_nil] && !value
+        regex = options.dig(:format, :with)
+        raise ArgumentError, options[:message] unless !regex || value =~ regex
+      }
     end
 
-    def self.validate(object)
-      @validators.each do |name, validator|
-        raise ArgumentError, validator[:message] \
-          unless validator[:unless].call(object.instance_variable_get(name))
-      end
+    def self.validate(name, **options)
+      @validators ||= []
+      @validators << ->(object) { raise ArgumentError, options[:message] unless object.send(name) }
     end
+
+    def self.do_validate(that)
+      @validators.each { |validator| validator.call(that) }
+      that
+    end
+
+    private_class_method :validates, :validate
 
     # :reek:DuplicateMethodCall { allow_calls: ['elements.shift', 'elements.first'] }
-    def self.parse(string, hint: {})
+    def self.parse(string)
       string ||= ''
       elements = string.split(/\$/, 6)
       elements.shift
@@ -26,7 +36,7 @@ module PhcStringFormat
       salt = elements.shift
       hash = elements.shift
       begin
-        PhcString.new(id, version, params, salt, hash, hint)
+        PhcString.new(id, version, params, salt, hash)
       rescue ArgumentError
         raise ParseError
       end
@@ -38,44 +48,37 @@ module PhcStringFormat
         ("v=#{version}" if version),
         (params.map { |entry| entry.join '=' }.join(',') if params),
         hint.dig(:salt, :encoding) == '7bit' ? salt : B64.encode(salt),
-        B64.encode(hash),
-        hint
+        B64.encode(hash)
       )
     end
 
-    validates :@id, message: 'id is non-compliant', unless: ->(id) { id && id =~ /\A[a-z0-9-]{1,32}\z/ }
+    validates :@id, message: 'id is non-compliant', format: { with: /\A[a-z0-9-]{1,32}\z/ }
     validates \
       :@version_string,
       message: 'version is non-compliant',
-      unless: ->(version_string) { !version_string || version_string =~ /\Av=\d+\z/ }
-    validates \
-      :@params_string,
-      message: 'parameters is non-compliant',
-      unless: proc { |params_string|
-        !params_string || !params_string.empty? && params_string.split(',').all? \
-          { |param| param =~ %r{\A[a-z0-9-]{1,32}=[a-zA-Z0-9/+.-]+\z} }
-      }
+      allow_nil: true,
+      format: { with: /\Av=\d+\z/ }
+    validate :validate_params_string, message: 'parameters is non-compliant'
     validates \
       :@encoded_salt,
       message: 'encoded salt is non-compliant',
-      unless: ->(encoded_salt) { !encoded_salt || encoded_salt =~ %r{\A[a-zA-Z0-9/+.-]+\z} }
+      allow_nil: true,
+      format: { with: %r{\A[a-zA-Z0-9/+.-]+\z} }
     validates \
       :@encoded_hash,
       message: 'encoded hash is non-compliant',
-      unless: ->(encoded_hash) { !encoded_hash || encoded_hash =~ %r{\A[a-zA-Z0-9/+]+\z} }
+      allow_nil: true,
+      format: { with: %r{\A[a-zA-Z0-9/+]+\z} }
+    validate :validate_salt_and_hash, message: 'hash needs salt'
 
-    # :reek:DuplicateMethodCall { allow_calls: ['!encoded_salt', '!encoded_hash'] }
-    def initialize(id, version_string, params_string, encoded_salt, encoded_hash, hint)
+    def initialize(id, version_string, params_string, encoded_salt, encoded_hash)
       @id = id
       @version_string = version_string
       @params_string = params_string
       @encoded_salt = encoded_salt
       @encoded_hash = encoded_hash
-      @hint = hint
 
-      self.class.validate self
-      raise ArgumentError, 'hash needs salt' \
-        if (!encoded_salt || encoded_salt.empty?) && !(!encoded_hash || encoded_hash.empty?)
+      self.class.do_validate self
     end
 
     def to_s
@@ -88,7 +91,7 @@ module PhcStringFormat
       ].reject { |element| !element || element.empty? }.join('$')
     end
 
-    def to_h(pick = nil)
+    def to_h(pick: nil, hint: {})
       pick ||= %i[id version params salt hash]
       {
         id: (@id if pick.include?(:id)),
@@ -96,7 +99,7 @@ module PhcStringFormat
         params: (parse_params(@params_string) if pick.include?(:params)),
         salt:
           if pick.include?(:salt)
-            @hint.dig(:salt, :encoding) == '7bit' ? e : B64.decode(@encoded_salt)
+            hint.dig(:salt, :encoding) == '7bit' ? @encoded_salt : B64.decode(@encoded_salt)
           end,
         hash: (B64.decode(@encoded_hash) if pick.include?(:hash))
       }.select { |_, value| value }
@@ -108,6 +111,15 @@ module PhcStringFormat
     end
 
     private
+
+    def validate_params_string
+      !@params_string || !@params_string.empty? && @params_string.split(',').all? \
+        { |param| param =~ %r{\A[a-z0-9-]{1,32}=[a-zA-Z0-9/+.-]+\z} }
+    end
+
+    def validate_salt_and_hash
+      !((!@encoded_salt || @encoded_salt.empty?) && !(!@encoded_hash || @encoded_hash.empty?))
+    end
 
     def parse_version(version_string)
       parse_params(version_string)['v']

@@ -62,7 +62,7 @@ RSpec.describe PhcStringFormat::PhcString do
   describe '#initialize' do
     context 'when id is blank' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new(nil, nil, nil, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new(nil, nil, nil, nil, nil) }
           .to raise_error ArgumentError, 'id is non-compliant'
       end
     end
@@ -70,7 +70,7 @@ RSpec.describe PhcStringFormat::PhcString do
     context 'when id contains characters other than: [a-z0-9-]' do
       it 'should raise the error' do
         id = 'foo_bar_baz'
-        expect { PhcStringFormat::PhcString.new(id, nil, nil, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new(id, nil, nil, nil, nil) }
           .to raise_error ArgumentError, 'id is non-compliant'
       end
     end
@@ -78,7 +78,7 @@ RSpec.describe PhcStringFormat::PhcString do
     context 'when the id exceeds 32 characters' do
       it 'should raise the error' do
         id = 'foo' * 11
-        expect { PhcStringFormat::PhcString.new(id, nil, nil, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new(id, nil, nil, nil, nil) }
           .to raise_error ArgumentError, 'id is non-compliant'
       end
     end
@@ -86,7 +86,7 @@ RSpec.describe PhcStringFormat::PhcString do
     context 'when version is empty' do
       it 'should raise the error' do
         version = ''
-        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil) }
           .to raise_error ArgumentError, 'version is non-compliant'
       end
     end
@@ -94,7 +94,7 @@ RSpec.describe PhcStringFormat::PhcString do
     context 'when version parameter name is incorrect' do
       it 'should raise the error' do
         version = 'b=1'
-        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil) }
           .to raise_error ArgumentError, 'version is non-compliant'
       end
     end
@@ -102,7 +102,7 @@ RSpec.describe PhcStringFormat::PhcString do
     context 'when version value is blank' do
       it 'should raise the error' do
         version = 'v='
-        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil) }
           .to raise_error ArgumentError, 'version is non-compliant'
       end
     end
@@ -110,23 +110,23 @@ RSpec.describe PhcStringFormat::PhcString do
     context 'when version value contains characters other than: [0-9]' do
       it 'should raise the error' do
         version = 'v=foo'
-        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', version, nil, nil, nil) }
           .to raise_error ArgumentError, 'version is non-compliant'
       end
     end
 
     context 'when parameters is empty' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, '', nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, '', nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, 'foo=0,,bar=1,', nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, 'foo=0,,bar=1,', nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
       end
     end
 
     context 'when parameter name contains characters other than: [a-z0-9-]' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, '01_foo=0', nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, '01_foo=0', nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
       end
     end
@@ -134,49 +134,49 @@ RSpec.describe PhcStringFormat::PhcString do
     context 'when the parameter name exceeds 32 characters' do
       it 'should raise the error' do
         params_string = "#{'bar' * 11}=0"
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, params_string, nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, params_string, nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
       end
     end
 
     context 'when parameter value contains characters other than: [a-zA-Z0-9/+.-]' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, 'p=?', nil, nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, 'p=?', nil, nil) }
           .to raise_error ArgumentError, 'parameters is non-compliant'
       end
     end
 
     context 'when encoded salt is empty' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, '', nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, '', nil) }
           .to raise_error ArgumentError, 'encoded salt is non-compliant'
       end
     end
 
     context 'when encoded salt contains characters other than: [a-zA-Z0-9/+.-]' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q-_N', nil, nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q-_N', nil) }
           .to raise_error ArgumentError, 'encoded salt is non-compliant'
       end
     end
 
     context 'when encoded hash is empty' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q+/N', '', nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q+/N', '') }
           .to raise_error ArgumentError, 'encoded hash is non-compliant'
       end
     end
 
     context 'when encoded hash contains characters other than: [a-zA-Z0-9/+]' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q+/N', 'q-_N', nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q+/N', 'q-_N') }
           .to raise_error ArgumentError, 'encoded hash is non-compliant'
       end
     end
 
     context 'when salt is blank and hash is present' do
       it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, nil, 'UEAkJHcwcmQ', nil) }
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, nil, 'UEAkJHcwcmQ') }
           .to raise_error ArgumentError, 'hash needs salt'
       end
     end

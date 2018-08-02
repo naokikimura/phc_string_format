@@ -8,7 +8,7 @@ module PhcStringFormat
     end
 
     def self.parse(string, hint: {}, pick: nil)
-      PhcString.parse(string, hint: hint).to_h(pick)
+      PhcString.parse(string).to_h(pick: pick, hint: hint)
     end
   end
 end
