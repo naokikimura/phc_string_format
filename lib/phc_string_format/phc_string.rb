@@ -37,8 +37,8 @@ module PhcStringFormat
       hash = elements.shift
       begin
         PhcString.new(id, version, params, salt, hash)
-      rescue ArgumentError
-        raise ParseError
+      rescue ArgumentError => exception
+        raise ParseError, exception.message
       end
     end
 
@@ -63,12 +63,12 @@ module PhcStringFormat
       :@encoded_salt,
       message: 'encoded salt is non-compliant',
       allow_nil: true,
-      format: { with: %r{\A[a-zA-Z0-9/+.-]+\z} }
+      format: { with: %r{\A[a-zA-Z0-9/+.-]*\z} }
     validates \
       :@encoded_hash,
       message: 'encoded hash is non-compliant',
       allow_nil: true,
-      format: { with: %r{\A[a-zA-Z0-9/+]+\z} }
+      format: { with: %r{\A[a-zA-Z0-9/+]*\z} }
     validate :validate_salt_and_hash, message: 'hash needs salt'
 
     def initialize(id, version_string, params_string, encoded_salt, encoded_hash)
@@ -88,7 +88,7 @@ module PhcStringFormat
         @params_string,
         @encoded_salt,
         @encoded_hash
-      ].reject { |element| !element || element.empty? }.join('$')
+      ].compact.join('$')
     end
 
     def to_h(pick: nil, hint: {})
@@ -118,7 +118,7 @@ module PhcStringFormat
     end
 
     def validate_salt_and_hash
-      !((!@encoded_salt || @encoded_salt.empty?) && !(!@encoded_hash || @encoded_hash.empty?))
+      @encoded_salt || !@encoded_hash
     end
 
     def parse_version(version_string)

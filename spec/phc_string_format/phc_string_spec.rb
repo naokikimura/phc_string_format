@@ -147,9 +147,9 @@ RSpec.describe PhcStringFormat::PhcString do
     end
 
     context 'when encoded salt is empty' do
-      it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, '', nil) }
-          .to raise_error ArgumentError, 'encoded salt is non-compliant'
+      it 'should return a instance' do
+        phc_string = PhcStringFormat::PhcString.new('argon2i', nil, nil, '', nil)
+        expect(phc_string).to be_a_kind_of(PhcStringFormat::PhcString)
       end
     end
 
@@ -161,9 +161,9 @@ RSpec.describe PhcStringFormat::PhcString do
     end
 
     context 'when encoded hash is empty' do
-      it 'should raise the error' do
-        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, 'q+/N', '') }
-          .to raise_error ArgumentError, 'encoded hash is non-compliant'
+      it 'should return a instance' do
+        phc_string = PhcStringFormat::PhcString.new('argon2i', nil, nil, '', '')
+        expect(phc_string).to be_a_kind_of(PhcStringFormat::PhcString)
       end
     end
 
@@ -174,8 +174,10 @@ RSpec.describe PhcStringFormat::PhcString do
       end
     end
 
-    context 'when salt is blank and hash is present' do
+    context 'when salt is nil and hash is present' do
       it 'should raise the error' do
+        expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, nil, '') }
+          .to raise_error ArgumentError, 'hash needs salt'
         expect { PhcStringFormat::PhcString.new('argon2i', nil, nil, nil, 'UEAkJHcwcmQ') }
           .to raise_error ArgumentError, 'hash needs salt'
       end
@@ -189,6 +191,46 @@ RSpec.describe PhcStringFormat::PhcString do
       expected = PhcStringFormat::PhcString.parse(encrypted_password)
       actual = PhcStringFormat::PhcString.parse(encrypted_password)
       expect(actual).to eq expected
+    end
+  end
+
+  describe '#to_s' do
+    it 'can be formatted as PHC string' do
+      expected = '$argon2i$v=19$m=4096,t=3,p=1' \
+        '$IfH5R3O3r3501DfGnGr2rw$DfQ8Hv9R2eF2uBs1dR99IGjVjDl/rpkJIkaNyZ1g3pk'
+      phc_string = PhcStringFormat::PhcString.new \
+        'argon2i',
+        'v=19',
+        'm=4096,t=3,p=1',
+        'IfH5R3O3r3501DfGnGr2rw',
+        'DfQ8Hv9R2eF2uBs1dR99IGjVjDl/rpkJIkaNyZ1g3pk'
+      expect(phc_string.to_s).to eq expected
+    end
+
+    context 'when salt is empty and hash is empty' do
+      it 'should end with "$$"' do
+        expected = '$example$v=19$m=4096,t=3,p=1$$'
+        phc_string = PhcStringFormat::PhcString.new \
+          'example',
+          'v=19',
+          'm=4096,t=3,p=1',
+          '',
+          ''
+        expect(phc_string.to_s).to eq expected
+      end
+    end
+
+    context 'when salt is empty and hash is present (eg "AAAA")' do
+      it 'should end with "$$AAAA"' do
+        expected = '$example$v=19$m=4096,t=3,p=1$$AAAA'
+        phc_string = PhcStringFormat::PhcString.new \
+          'example',
+          'v=19',
+          'm=4096,t=3,p=1',
+          '',
+          'AAAA'
+        expect(phc_string.to_s).to eq expected
+      end
     end
   end
 end
