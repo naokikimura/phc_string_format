@@ -23,23 +23,24 @@ module PhcStringFormat
       that
     end
 
-    private_class_method :validates, :validate
-
-    # :reek:DuplicateMethodCall { allow_calls: ['elements.shift', 'elements.first'] }
     def self.parse(string)
       string ||= ''
+      PhcString.new(*split(string))
+    rescue StandardError => exception
+      raise ParseError, exception.message
+    end
+
+    # :reek:DuplicateMethodCall { allow_calls: ['elements.shift', 'elements.first'] }
+    def self.split(string)
       elements = string.split(/\$/, 6)
       elements.shift
-      id = elements.shift
-      version = elements.shift if (elements.first || '').start_with?('v=')
-      params = elements.shift if (elements.first || '').include?('=')
-      salt = elements.shift
-      hash = elements.shift
-      begin
-        PhcString.new(id, version, params, salt, hash)
-      rescue ArgumentError => exception
-        raise ParseError, exception.message
-      end
+      [
+        elements.shift,
+        (elements.shift if (elements.first || '').start_with?('v=')),
+        (elements.shift if (elements.first || '').include?('=')),
+        elements.shift,
+        elements.shift
+      ]
     end
 
     def self.create(id:, version: nil, params: nil, salt: nil, hash: nil, hint: {})
@@ -51,6 +52,8 @@ module PhcStringFormat
         B64.encode(hash)
       )
     end
+
+    private_class_method :validates, :validate, :split
 
     validates :@id, message: 'id is non-compliant', format: { with: /\A[a-z0-9-]{1,32}\z/ }
     validates \
