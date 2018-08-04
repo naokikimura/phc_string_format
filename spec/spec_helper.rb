@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "simplecov"
 require "phc_string_format"
 
 RSpec.configure do |config|
