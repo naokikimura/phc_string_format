@@ -1,7 +1,8 @@
 require 'phc_string_format/b64'
-require 'phc_string_format/formatter'
-require 'phc_string_format/phc_string'
 require 'phc_string_format/version'
+require 'phc_string_format/validations'
+require 'phc_string_format/phc_string'
+require 'phc_string_format/formatter'
 
 #
 # PHC string format implemented by Ruby

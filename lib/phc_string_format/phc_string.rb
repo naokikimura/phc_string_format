@@ -3,25 +3,7 @@ module PhcStringFormat
   # Parser for parsing PHC-string-format.
   #
   class PhcString
-    def self.validates(name, **options)
-      @validators ||= []
-      @validators << lambda { |object|
-        value = object.instance_variable_get(name)
-        return if options[:allow_nil] && !value
-        regex = options.dig(:format, :with)
-        raise ArgumentError, options[:message] unless !regex || value =~ regex
-      }
-    end
-
-    def self.validate(name, **options)
-      @validators ||= []
-      @validators << ->(object) { raise ArgumentError, options[:message] unless object.send(name) }
-    end
-
-    def self.do_validate(that)
-      @validators.each { |validator| validator.call(that) }
-      that
-    end
+    include Validations
 
     def self.parse(string)
       string ||= ''
@@ -53,7 +35,7 @@ module PhcStringFormat
       )
     end
 
-    private_class_method :validates, :validate, :split
+    private_class_method :split
 
     validates :@id, message: 'id is non-compliant', format: { with: /\A[a-z0-9-]{1,32}\z/ }
     validates \

@@ -9,26 +9,18 @@ AllCops:
   - '*.gemspec'
   - Rakefile
 
-Metrics/AbcSize:
-  Max: 20
-
 Metrics/BlockLength:
   Exclude:
   - 'spec/**/*'
-Metrics/ClassLength:
-  Max: 120
 
 Metrics/CyclomaticComplexity:
-  Max: 10
+  Max: 7
 
 Metrics/LineLength:
-  Max: 110
+   Max: 110
 
 Metrics/MethodLength:
   Max: 15
 
 Metrics/ParameterLists:
   Max: 6
-
-Metrics/PerceivedComplexity:
-  Max: 10
