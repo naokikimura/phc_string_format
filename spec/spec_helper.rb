@@ -1,5 +1,12 @@
 require "bundler/setup"
 require "simplecov"
+
+if ENV['CODACY_PROJECT_TOKEN']
+  require "codacy-coverage"
+
+  Codacy::Reporter.start
+end
+
 require "phc_string_format"
 
 RSpec.configure do |config|

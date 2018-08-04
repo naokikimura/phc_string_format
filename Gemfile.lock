@@ -12,6 +12,8 @@ GEM
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
     byebug (10.0.2)
+    codacy-coverage (1.1.8)
+      simplecov
     codeclimate-engine-rb (0.4.1)
       virtus (~> 1.0)
     coderay (1.1.2)
@@ -84,6 +86,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.16)
+  codacy-coverage
   phc_string_format!
   pry-byebug (~> 3.6)
   rake (~> 10.0)
