@@ -7,3 +7,5 @@ gemspec
 
 gem "rubocop", "~> 0.58.2", require: false, :groups => [:development, :test]
 gem "reek", "~> 5.0", require: false, :groups => [:development, :test]
+gem 'simplecov', require: false, group: :test
+gem 'codacy-coverage', require: false, group: :test
