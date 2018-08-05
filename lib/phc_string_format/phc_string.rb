@@ -26,13 +26,12 @@ module PhcStringFormat
     end
 
     def self.create(id:, version: nil, params: nil, salt: nil, hash: nil, hint: {})
-      PhcString.new(
+      PhcString.new \
         id,
-        ("v=#{version}" if version),
-        (params.map { |entry| entry.join '=' }.join(',') if params),
+        (Parameters.to_s(v: version) if version),
+        (Parameters.to_s(params) if params),
         hint.dig(:salt, :encoding) == '7bit' ? salt : B64.encode(salt),
         B64.encode(hash)
-      )
     end
 
     private_class_method :split
@@ -80,8 +79,8 @@ module PhcStringFormat
       pick ||= %i[id version params salt hash]
       {
         id: (@id if pick.include?(:id)),
-        version: (parse_version(@version_string) if pick.include?(:version)),
-        params: (parse_params(@params_string) if pick.include?(:params)),
+        version: (Parameters.to_h(@version_string)['v'] if pick.include?(:version)),
+        params: (Parameters.to_h(@params_string) if pick.include?(:params)),
         salt:
           if pick.include?(:salt)
             hint.dig(:salt, :encoding) == '7bit' ? @encoded_salt : B64.decode(@encoded_salt)
@@ -106,18 +105,23 @@ module PhcStringFormat
       @encoded_salt || !@encoded_hash
     end
 
-    def parse_version(version_string)
-      parse_params(version_string)['v']
-    end
-
-    def parse_params(params_string)
-      mapper = ->(param) { param.split '=' }
-      reducer = lambda do |param, params|
-        name, value = param
-        params[name] = value =~ /\A-?\d+(.\d+)?\Z/ ? value.to_i : value
+    #
+    # PHC string parameters
+    #
+    module Parameters
+      def self.to_s(params)
+        params ||= {}
+        params.map { |param| param.join '=' }.join(',')
       end
-      params_string ||= ''
-      params_string.split(/,/).map(&mapper).each_with_object({}, &reducer)
+
+      def self.to_h(params_string)
+        params_string ||= ''
+        params_string
+          .split(/,/)
+          .map { |param| param.split '=' }
+          .map { |name, value| [name, value =~ /\A-?\d+(.\d+)?\Z/ ? value.to_i : value] }
+          .to_h
+      end
     end
   end
 
