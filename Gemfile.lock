@@ -85,7 +85,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.16)
+  bundler (~> 2)
   codacy-coverage
   phc_string_format!
   pry-byebug (~> 3.6)
@@ -96,4 +96,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   1.16.2
+   2.0.1
