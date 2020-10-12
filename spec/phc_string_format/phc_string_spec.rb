@@ -42,7 +42,7 @@ RSpec.describe PhcStringFormat::PhcString do
         salt: ['21f1f94773b7af7e74d437c69c6af6af'].pack('H*'),
         hash: ['0df43c1eff51d9e176b81b35751f7d2068d58c397fae990922468dc99d60de99'].pack('H*')
       }
-      phc_string = PhcStringFormat::PhcString.create(phc_string_parameters)
+      phc_string = PhcStringFormat::PhcString.create(**phc_string_parameters)
       expect(phc_string.to_s).to eq expected
     end
 
@@ -54,7 +54,7 @@ RSpec.describe PhcStringFormat::PhcString do
         salt: ['21f1f94773b7af7e74d437c69c6af6af'].pack('H*'),
         hash: ['0df43c1eff51d9e176b81b35751f7d2068d58c397fae990922468dc99d60de99'].pack('H*')
       }
-      phc_string = PhcStringFormat::PhcString.create(phc_string_parameters)
+      phc_string = PhcStringFormat::PhcString.create(**phc_string_parameters)
       expect(phc_string.to_h).to eq phc_string_parameters
     end
   end

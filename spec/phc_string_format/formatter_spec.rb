@@ -38,7 +38,7 @@ RSpec.describe PhcStringFormat::Formatter do
     ]
     test_cases.each do |test_case|
       phc_params = PhcStringFormat::Formatter.parse(test_case)
-      phc_string = PhcStringFormat::Formatter.format(phc_params)
+      phc_string = PhcStringFormat::Formatter.format(**phc_params)
       expect(phc_string).to eq(test_case)
     end
   end
