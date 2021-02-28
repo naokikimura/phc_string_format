@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PhcStringFormat
   #
   # Parser for parsing PHC-string-format.
@@ -8,8 +10,8 @@ module PhcStringFormat
     def self.parse(string)
       string ||= ''
       PhcString.new(*split(string))
-    rescue StandardError => exception
-      raise ParseError, exception.message
+    rescue StandardError => e
+      raise ParseError, e.message
     end
 
     # :reek:DuplicateMethodCall { allow_calls: ['elements.shift', 'elements.first'] }
@@ -66,15 +68,16 @@ module PhcStringFormat
     end
 
     def to_s
-      '$' + [
+      "$#{[
         @id,
         @version_string,
         @params_string,
         @encoded_salt,
         @encoded_hash
-      ].compact.join('$')
+      ].compact.join('$')}"
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
     def to_h(pick: nil, hint: {})
       pick ||= %i[id version params salt hash]
       {
@@ -88,6 +91,7 @@ module PhcStringFormat
         hash: (B64.decode(@encoded_hash) if pick.include?(:hash))
       }.select { |_, value| value }
     end
+    # rubocop:enable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
 
     def ==(other)
       instance_variable_values = other.instance_variables.map { |name| other.instance_variable_get(name) }
@@ -116,7 +120,7 @@ module PhcStringFormat
 
       def self.to_h(params_string)
         params_string ||= ''
-        params_string
+        params_string # rubocop:disable Style/HashTransformValues
           .split(/,/)
           .map { |param| param.split '=' }
           .map { |name, value| [name, value =~ /\A-?\d+(.\d+)?\Z/ ? value.to_i : value] }

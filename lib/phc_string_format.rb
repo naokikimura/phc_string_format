@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'phc_string_format/b64'
 require 'phc_string_format/version'
 require 'phc_string_format/validations'

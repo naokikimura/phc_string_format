@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PhcStringFormat
   #
   # Formatter for stringifying and parsing PHC-string-format.

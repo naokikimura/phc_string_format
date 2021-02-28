@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'pry'
 
 RSpec.describe PhcStringFormat do
