@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PhcStringFormat
   #
   # Provides a validation framework to your objects.
@@ -6,6 +8,7 @@ module PhcStringFormat
     def self.included(klass)
       klass.extend ClassMethods
     end
+
     #
     # class methods
     #
@@ -15,6 +18,7 @@ module PhcStringFormat
         @validators << lambda { |object|
           value = object.instance_variable_get(name)
           return if options[:allow_nil] && !value
+
           regex = options.dig(:format, :with)
           raise ArgumentError, options[:message] unless !regex || value =~ regex
         }

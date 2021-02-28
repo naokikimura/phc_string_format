@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'base64'
 
 module PhcStringFormat
@@ -10,11 +12,13 @@ module PhcStringFormat
   module B64
     def self.encode(bin)
       return nil unless bin
+
       Base64.strict_encode64(bin).delete('=')
     end
 
     def self.decode(bin)
       return nil unless bin
+
       Base64.strict_decode64(bin + '=' * (-bin.size % 4))
     end
   end
