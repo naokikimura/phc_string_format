@@ -4,7 +4,7 @@ module PhcStringFormat
   #
   module Formatter
     def self.format(**kwargs)
-      PhcString.create(kwargs).to_s
+      PhcString.create(**kwargs).to_s
     end
 
     def self.parse(string, hint: {}, pick: nil)
